@@ -1,0 +1,72 @@
+#When connected to ec2 machine download kafka by running the command below:
+wget https://downloads.apache.org/kafka/3.3.1/kafka_2.12-3.3.1.tgz
+
+#to uncompress kafka paste the command below:
+tar -xvf kafka_2.12-3.3.1.tgz
+
+
+
+#Apache kafka runs on top on Java Virtual machine, so we need to check if we have Java
+installed
+-----------------------
+java -version
+#if no Java installed on the machine, run the following command to install it
+(You can run kafka on your local machine, if you dont want to install kafka on ec2 machine
+you can do on or local computer also)
+sudo yum install java-1.8.0-openjdk
+java -version
+#after kafka installed, navigate to kafka folder, earlier uncompressed
+cd kafka_2.12-3.3.1
+
+
+#Start Zoo-keeper server:
+-------------------------------
+bin/zookeeper-server-start.sh config/zookeeper.properties
+
+----------
+#open new terminal and do the following commands while leaving the previous terminal running,
+#On one window we will have zookeper running on the other we will start kafka server
+#navigate to the Kafka folder where your key file stored, copy SSHC command
+#and connect to EC2 machine
+#After we want to increase the memory for your Kafka server, so we want to assign some memory to it
+
+Start Kafka-server:
+----------------------------------------
+Duplicate the session & enter in a new console --(the command below will allocate some memory to Kafka server)
+export KAFKA_HEAP_OPTS="-Xmx256M -Xms128M"
+#after that we need to start the kafka server
+cd kafka_2.12-3.3.1
+
+bin/kafka-server-start.sh config/server.properties
+
+It is pointing to private server , change server.properties so that it can run in public IP
+#before that closed on both terminal zookeper and kafka server with ctrl z
+
+#To do this , you can follow any of the 2 approaches shared below --
+#Do a  "sudo nano config/server.properties" - change ADVERTISED_LISTENERS to public ip (can be found in the EC2 instance)
+#Once the public ip changed, start the zoo-keeper server again, and on the second terminal
+#start the Kafka server, Now the KAfka server should run on top on public IP adress
+
+
+
+
+Create the topic:
+----------------------------
+Duplicate the session & enter in a new console --
+cd kafka_2.12-3.3.1
+bin/kafka-topics.sh --create --topic demo_test --bootstrap-server {Put the Public IP of your EC2 Instance:9092} --replication-factor 1 --partitions 1
+
+
+Start Producer (Make sure the topic name is the same)
+--------------------------
+bin/kafka-console-producer.sh --topic demo_test --bootstrap-server {Put the Public IP of your EC2 Instance:9092}
+
+
+Open new terminal window to Start Consumer (Make sure the topic name is the same)
+-------------------------
+Duplicate the session & enter in a new console --
+cd kafka_2.12-3.3.1
+bin/kafka-console-consumer.sh --topic demo_test --bootstrap-server {Put the Public IP of your EC2 Instance:9092}
+
+
+
